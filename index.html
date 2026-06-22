@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planificador de Producción</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <div class="header-brand">
+        <span class="header-icon">⬡</span>
+        <span class="header-title">Planificador de Producción</span>
+      </div>
+      <nav class="header-nav">
+        <button class="nav-btn active" onclick="showSection('obras')">Obras</button>
+        <button class="nav-btn" onclick="showSection('planificar')">Planificar</button>
+        <button class="nav-btn" onclick="showSection('config')">Configuración</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- SECCION OBRAS -->
+    <section id="sec-obras">
+      <div class="section-header">
+        <h1>Obras</h1>
+        <button class="btn-primary" onclick="showModal('modal-obra')">+ Nueva obra</button>
+      </div>
+
+      <div id="obras-empty" class="empty-state">
+        <div class="empty-icon">📋</div>
+        <p>No hay obras cargadas todavía.</p>
+        <button class="btn-primary" onclick="showModal('modal-obra')">Cargar primera obra</button>
+      </div>
+
+      <div id="obras-grid" class="obras-grid hidden"></div>
+    </section>
+
+    <!-- SECCION PLANIFICAR -->
+    <section id="sec-planificar" class="hidden">
+      <div class="section-header">
+        <h1>Planificación semanal</h1>
+      </div>
+
+      <div id="plan-no-obra" class="empty-state">
+        <div class="empty-icon">🏗️</div>
+        <p>Seleccioná una obra para comenzar a planificar.</p>
+        <button class="btn-secondary" onclick="showSection('obras')">Ir a Obras</button>
+      </div>
+
+      <div id="plan-contenido" class="hidden">
+        <div class="plan-top">
+          <div class="plan-obra-info" id="plan-obra-info"></div>
+          <div class="plan-controls">
+            <label>Inicio planificación</label>
+            <input type="date" id="fecha-inicio">
+            <button class="btn-primary" onclick="generarPlan()">Planificar ↗</button>
+            <button class="btn-secondary" onclick="limpiarCantidades()">Limpiar</button>
+          </div>
+        </div>
+
+        <div class="aberturas-card">
+          <div class="aberturas-table-header">
+            <span>Tipo</span><span>Descripción</span><span>Medida</span><span>Total obra</span><span>A fabricar</span>
+          </div>
+          <div id="aberturas-list"></div>
+        </div>
+
+        <div id="plan-resultado" class="hidden">
+          <div class="metrics-grid" id="plan-metrics"></div>
+          <div class="op-legend" id="op-legend"></div>
+          <div id="plan-weeks"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCION CONFIG -->
+    <section id="sec-config" class="hidden">
+      <div class="section-header"><h1>Configuración</h1></div>
+
+      <div class="config-grid">
+        <div class="config-card">
+          <h2>Capacidad por estación (unidades/día)</h2>
+          <table class="config-table">
+            <tr><th>Estación</th><th>Lun–Jue</th><th>Viernes</th></tr>
+            <tr><td>Corte</td><td><input type="number" id="c-corte-lj" value="27" class="config-input"></td><td><input type="number" id="c-corte-v" value="24" class="config-input"></td></tr>
+            <tr><td>Preparación</td><td><input type="number" id="c-prep-lj" value="10" class="config-input"></td><td><input type="number" id="c-prep-v" value="10" class="config-input"></td></tr>
+            <tr><td class="muted">↳ Cortador en prep.</td><td><input type="number" id="c-corte-prep" value="5" class="config-input"></td><td><input type="number" id="c-corte-prep-v" value="5" class="config-input"></td></tr>
+            <tr><td class="muted">↳ Armador en prep.</td><td><input type="number" id="c-arm-prep" value="10" class="config-input"></td><td><input type="number" id="c-arm-prep-v" value="10" class="config-input"></td></tr>
+          </table>
+        </div>
+
+        <div class="config-card">
+          <h2>Armado (unidades/operario/día)</h2>
+          <table class="config-table">
+            <tr><th>Tipo</th><th>Unidades</th></tr>
+            <tr><td>Corrediza</td><td><input type="number" id="c-arm-corr" value="5" class="config-input"></td></tr>
+            <tr><td>Oscilobatiente</td><td><input type="number" id="c-arm-oscilo" value="1.5" class="config-input" step="0.5"></td></tr>
+          </table>
+          <div class="config-row" style="margin-top:16px">
+            <label>Colchón mínimo stock cortado (días)</label>
+            <input type="number" id="c-colchon" value="2" class="config-input">
+          </div>
+        </div>
+
+        <div class="config-card">
+          <h2>Nombres de operarios</h2>
+          <div class="operarios-list" id="operarios-config"></div>
+        </div>
+      </div>
+
+      <button class="btn-primary" onclick="guardarConfig()" style="margin-top:20px">Guardar configuración</button>
+      <span id="cfg-ok" class="save-ok hidden">✓ Guardado</span>
+    </section>
+
+  </main>
+
+  <!-- MODAL NUEVA OBRA -->
+  <div id="modal-obra" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Nueva obra</h2>
+        <button class="modal-close" onclick="hideModal('modal-obra')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Nombre de la obra</label>
+          <input type="text" id="obra-nombre" placeholder="Ej: Torre Náutica" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Número de presupuesto</label>
+          <input type="text" id="obra-ppto" placeholder="Ej: 501793" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Cliente</label>
+          <input type="text" id="obra-cliente" placeholder="Ej: Empresa SA" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Sistema / Descripción</label>
+          <input type="text" id="obra-sistema" placeholder="Ej: Nordical 90° Corrediza" class="form-input">
+        </div>
+        <div class="form-group">
+          <label>Aberturas</label>
+          <p class="form-hint">Ingresá cada abertura: tipo, medida, descripción, categoría (corrediza/oscilo) y cantidad total de la obra.</p>
+          <div id="aberturas-nuevas">
+            <div class="abertura-nueva-header">
+              <span>Tipo</span><span>Medida</span><span>Descripción</span><span>Cat.</span><span>Total</span><span></span>
+            </div>
+            <div id="abertura-rows"></div>
+          </div>
+          <button class="btn-secondary" onclick="agregarFilaAbertura()" style="margin-top:8px">+ Agregar abertura</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="hideModal('modal-obra')">Cancelar</button>
+        <button class="btn-primary" onclick="guardarObra()">Guardar obra</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
