@@ -190,14 +190,19 @@ section { display: block; }
 .del-row-btn { background: none; border: none; color: var(--text-tertiary); cursor: pointer; font-size: 16px; padding: 0; }
 .del-row-btn:hover { color: var(--red-text); }
 
-/* ============================================================
-   ESTILOS DE IMPRESION
-   ============================================================ */
+/* PLAN GLOBAL */
+.obra-plan-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 16px; overflow: hidden; }
+.obra-plan-header { padding: 14px 16px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+.obra-plan-nombre { font-size: 15px; font-weight: 600; }
+.obra-plan-aberturas { padding: 0 16px; }
+.prioridad-badge { background: var(--text); color: #fff; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px; }
+.wb-crit { background: var(--red-bg); color: var(--red-text); }
+
+/* PRINT */
 @media print {
   header, .nav-btn, .btn-primary, .btn-secondary, .sugg-card,
   .rot-active-info button, #btn-imprimir, .obra-actions,
   .plan-controls button, .free-slot button { display: none !important; }
-
   body { background: #fff; font-size: 12px; }
   main { padding: 0; max-width: 100%; }
   .week-block { break-inside: avoid; margin-bottom: 10px; border: 1px solid #ccc; }
@@ -208,7 +213,6 @@ section { display: block; }
   .stations { grid-template-columns: 1fr 1fr 1fr; }
   #sec-obras, #sec-config { display: none !important; }
   #sec-planificar { display: block !important; }
-  .plan-top { display: none; }
-  .aberturas-card { display: none; }
+  .plan-top, .obra-plan-card { display: none !important; }
   h1 { font-size: 16px; margin-bottom: 8px; }
 }
