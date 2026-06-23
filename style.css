@@ -189,3 +189,26 @@ section { display: block; }
 .abertura-nueva-row input, .abertura-nueva-row select { padding: 5px 8px; font-size: 12px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--surface); color: var(--text); width: 100%; }
 .del-row-btn { background: none; border: none; color: var(--text-tertiary); cursor: pointer; font-size: 16px; padding: 0; }
 .del-row-btn:hover { color: var(--red-text); }
+
+/* ============================================================
+   ESTILOS DE IMPRESION
+   ============================================================ */
+@media print {
+  header, .nav-btn, .btn-primary, .btn-secondary, .sugg-card,
+  .rot-active-info button, #btn-imprimir, .obra-actions,
+  .plan-controls button, .free-slot button { display: none !important; }
+
+  body { background: #fff; font-size: 12px; }
+  main { padding: 0; max-width: 100%; }
+  .week-block { break-inside: avoid; margin-bottom: 10px; border: 1px solid #ccc; }
+  .week-header { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .wbadge, .chip, .badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .capbar-fill { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .metrics-grid { grid-template-columns: repeat(4, 1fr); }
+  .stations { grid-template-columns: 1fr 1fr 1fr; }
+  #sec-obras, #sec-config { display: none !important; }
+  #sec-planificar { display: block !important; }
+  .plan-top { display: none; }
+  .aberturas-card { display: none; }
+  h1 { font-size: 16px; margin-bottom: 8px; }
+}
