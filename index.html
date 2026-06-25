@@ -37,7 +37,7 @@
       <div class="section-header"><h1>Plan de producción</h1></div>
       <div class="plan-top">
         <div style="font-size:13px;color:#6b6b68;flex:1;line-height:1.6">
-          Agregá lotes de producción por obra. Podés agregar nuevos lotes en cualquier momento y el plan los encadena automáticamente sin baches.
+          Agregá lotes normales o urgentes. Los lotes urgentes se intercalan automáticamente con prioridad en el plan global.
         </div>
         <div class="plan-controls">
           <label>Inicio planificación</label>
@@ -60,29 +60,43 @@
       <div class="section-header"><h1>Configuración</h1></div>
       <div class="config-grid">
         <div class="config-card">
-          <h2>Capacidad por estación (unidades/día)</h2>
+          <h2>Corte (unidades/operario/día)</h2>
           <table class="config-table">
-            <tr><th>Estación / Rol</th><th>Lun–Jue</th><th>Viernes</th></tr>
-            <tr><td>Corte</td><td><input type="number" id="c-corte-lj" value="27" class="config-input"></td><td><input type="number" id="c-corte-v" value="24" class="config-input"></td></tr>
-            <tr><td>Preparación (c/u)</td><td><input type="number" id="c-prep-lj" value="10" class="config-input"></td><td><input type="number" id="c-prep-v" value="10" class="config-input"></td></tr>
-            <tr><td class="muted">↳ Cortador en prep.</td><td><input type="number" id="c-corte-prep" value="5" class="config-input"></td><td><input type="number" id="c-corte-prep-v" value="5" class="config-input"></td></tr>
-            <tr><td class="muted">↳ Armador en prep.</td><td><input type="number" id="c-arm-prep" value="10" class="config-input"></td><td><input type="number" id="c-arm-prep-v" value="10" class="config-input"></td></tr>
+            <tr><th>Tipo</th><th>Lun–Jue</th><th>Viernes</th></tr>
+            <tr><td>Marcos</td><td><input type="number" id="c-corte-marco-lj" value="26" class="config-input"></td><td><input type="number" id="c-corte-marco-v" value="26" class="config-input"></td></tr>
+            <tr><td>Hojas</td><td><input type="number" id="c-corte-hoja-lj" value="26" class="config-input"></td><td><input type="number" id="c-corte-hoja-v" value="26" class="config-input"></td></tr>
+          </table>
+        </div>
+        <div class="config-card">
+          <h2>Preparación (unidades/operario/día)</h2>
+          <table class="config-table">
+            <tr><th>Tipo</th><th>Lun–Jue</th><th>Viernes</th></tr>
+            <tr><td>Marcos</td><td><input type="number" id="c-prep-marco-lj" value="10" class="config-input"></td><td><input type="number" id="c-prep-marco-v" value="10" class="config-input"></td></tr>
+            <tr><td>Hojas</td><td><input type="number" id="c-prep-hoja-lj" value="12" class="config-input"></td><td><input type="number" id="c-prep-hoja-v" value="12" class="config-input"></td></tr>
           </table>
         </div>
         <div class="config-card">
           <h2>Armado (unidades/operario/día)</h2>
           <table class="config-table">
-            <tr><th>Tipo</th><th>Unidades</th></tr>
-            <tr><td>Corrediza</td><td><input type="number" id="c-arm-corr" value="5" class="config-input"></td></tr>
-            <tr><td>Oscilobatiente</td><td><input type="number" id="c-arm-oscilo" value="1.5" class="config-input" step="0.5"></td></tr>
+            <tr><th>Tipo</th><th>Lun–Jue</th><th>Viernes</th></tr>
+            <tr><td>Marcos</td><td><input type="number" id="c-arm-marco-lj" value="10" class="config-input"></td><td><input type="number" id="c-arm-marco-v" value="10" class="config-input"></td></tr>
+            <tr><td>Hojas</td><td><input type="number" id="c-arm-hoja-lj" value="8" class="config-input"></td><td><input type="number" id="c-arm-hoja-v" value="8" class="config-input"></td></tr>
           </table>
-          <div class="config-row" style="margin-top:16px">
+        </div>
+        <div class="config-card">
+          <h2>Rotación automática (cuando van a prep.)</h2>
+          <table class="config-table">
+            <tr><th>Rol</th><th>Lun–Jue</th><th>Viernes</th></tr>
+            <tr><td>Cortador en prep.</td><td><input type="number" id="c-corte-prep-lj" value="5" class="config-input"></td><td><input type="number" id="c-corte-prep-v" value="5" class="config-input"></td></tr>
+            <tr><td>Armador en prep.</td><td><input type="number" id="c-arm-prep-lj" value="10" class="config-input"></td><td><input type="number" id="c-arm-prep-v" value="10" class="config-input"></td></tr>
+          </table>
+          <div class="config-row" style="margin-top:12px">
             <label>Colchón mínimo stock cortado (días)</label>
             <input type="number" id="c-colchon" value="2" class="config-input">
           </div>
         </div>
-        <div class="config-card">
-          <h2>Operarios por estación</h2>
+        <div class="config-card" style="grid-column:span 2">
+          <h2>Operarios por estación y modo de armado</h2>
           <div class="operarios-list" id="operarios-config"></div>
         </div>
       </div>
@@ -99,13 +113,12 @@
         <button class="modal-close" onclick="hideModal('modal-obra')">✕</button>
       </div>
       <div class="modal-body">
-        <div class="form-group"><label>Nombre de la obra</label><input type="text" id="obra-nombre" placeholder="Ej: Torre Náutica" class="form-input"></div>
+        <div class="form-group"><label>Nombre</label><input type="text" id="obra-nombre" placeholder="Ej: Torre Náutica" class="form-input"></div>
         <div class="form-group"><label>Número de presupuesto</label><input type="text" id="obra-ppto" placeholder="Ej: 501793" class="form-input"></div>
         <div class="form-group"><label>Cliente</label><input type="text" id="obra-cliente" placeholder="Ej: Empresa SA" class="form-input"></div>
-        <div class="form-group"><label>Sistema / Descripción</label><input type="text" id="obra-sistema" placeholder="Ej: Nordical 90° Corrediza" class="form-input"></div>
+        <div class="form-group"><label>Sistema</label><input type="text" id="obra-sistema" placeholder="Ej: Nordical 90°" class="form-input"></div>
         <div class="form-group">
           <label>Aberturas</label>
-          <p class="form-hint">Ingresá cada tipo con medida, descripción, categoría y cantidad total de la obra.</p>
           <div class="abertura-nueva-header"><span>Tipo</span><span>Medida</span><span>Descripción</span><span>Cat.</span><span>Total</span><span></span></div>
           <div id="abertura-rows"></div>
           <button class="btn-secondary" onclick="agregarFilaAbertura()" style="margin-top:8px">+ Agregar tipo</button>
@@ -126,10 +139,28 @@
         <button class="modal-close" onclick="hideModal('modal-lote')">✕</button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <label>Fecha límite del lote (opcional)</label>
+        <input type="hidden" id="lote-urgente" value="0">
+
+        <div id="div-fecha-inicio-lote" class="form-group" style="display:none">
+          <label>⚡ Fecha de inicio del lote urgente</label>
           <input type="date" id="lote-fecha" class="form-input">
+          <div style="font-size:12px;color:#633806;margin-top:4px">Este lote se intercalará en el plan desde esta fecha con prioridad máxima.</div>
         </div>
+
+        <div class="form-group">
+          <label>Fecha límite (obligatoria para urgentes)</label>
+          <input type="date" id="lote-fecha-fin" class="form-input">
+        </div>
+
+        <div id="div-tipo-lote" class="form-group">
+          <label>Tipo de producción</label>
+          <select id="tipo-lote" class="form-input">
+            <option value="completo">🪟 Ventana completa (marco + hoja juntos)</option>
+            <option value="marcos">🔲 Solo marcos</option>
+            <option value="hojas">📋 Solo hojas</option>
+          </select>
+        </div>
+
         <div class="form-group">
           <label>Cantidades a fabricar en este lote</label>
           <div class="aberturas-table-header">
