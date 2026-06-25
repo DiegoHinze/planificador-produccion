@@ -437,7 +437,6 @@ function generarPlan() {
 
   const nPrep=prepNombres.length;
   const nArm=opNames.length;
-  const nArmEfect=parejaArmado?Math.max(1,Math.floor(nArm/2)):nArm;
   const nArmEfectivo=parejaArmado?Math.floor(nArm/2):nArm;
 
   // Separar lotes urgentes de normales
