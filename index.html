@@ -16,6 +16,7 @@
       <nav class="header-nav">
         <button class="nav-btn active" onclick="showSection('obras')">Obras</button>
         <button class="nav-btn" onclick="showSection('planificar')">Planificar</button>
+        <button class="nav-btn" onclick="showSection('stock')">Stock</button>
         <button class="nav-btn" onclick="showSection('config')">Configuración</button>
       </nav>
     </div>
@@ -56,6 +57,17 @@
       </div>
     </section>
 
+    <section id="sec-stock" class="hidden">
+      <div class="section-header">
+        <h1>Stock de producción terminada</h1>
+        <button class="btn-secondary" onclick="limpiarStock()">Limpiar stock</button>
+      </div>
+      <div style="font-size:13px;color:#6b6b68;margin-bottom:20px">
+        Stock acumulado de todo lo producido, descontando lo ya despachado a obra. Para actualizar el stock, regenerá el plan desde la pestaña Planificar.
+      </div>
+      <div id="stock-container"></div>
+    </section>
+
     <section id="sec-config" class="hidden">
       <div class="section-header"><h1>Configuración</h1></div>
       <div class="config-grid">
@@ -84,14 +96,14 @@
           </table>
         </div>
         <div class="config-card">
-          <h2>Rotación automática (cuando van a prep.)</h2>
+          <h2>Rotación automática</h2>
           <table class="config-table">
-            <tr><th>Rol</th><th>Lun–Jue</th><th>Viernes</th></tr>
-            <tr><td>Cortador en prep.</td><td><input type="number" id="c-corte-prep-lj" value="5" class="config-input"></td><td><input type="number" id="c-corte-prep-v" value="5" class="config-input"></td></tr>
-            <tr><td>Armador en prep.</td><td><input type="number" id="c-arm-prep-lj" value="10" class="config-input"></td><td><input type="number" id="c-arm-prep-v" value="10" class="config-input"></td></tr>
+            <tr><th>Rol en prep.</th><th>Lun–Jue</th><th>Viernes</th></tr>
+            <tr><td>Cortador</td><td><input type="number" id="c-corte-prep-lj" value="5" class="config-input"></td><td><input type="number" id="c-corte-prep-v" value="5" class="config-input"></td></tr>
+            <tr><td>Armador</td><td><input type="number" id="c-arm-prep-lj" value="10" class="config-input"></td><td><input type="number" id="c-arm-prep-v" value="10" class="config-input"></td></tr>
           </table>
           <div class="config-row" style="margin-top:12px">
-            <label>Colchón mínimo stock cortado (días)</label>
+            <label>Colchón mínimo stock (días)</label>
             <input type="number" id="c-colchon" value="2" class="config-input">
           </div>
         </div>
@@ -140,18 +152,15 @@
       </div>
       <div class="modal-body">
         <input type="hidden" id="lote-urgente" value="0">
-
         <div id="div-fecha-inicio-lote" class="form-group" style="display:none">
           <label>⚡ Fecha de inicio del lote urgente</label>
           <input type="date" id="lote-fecha" class="form-input">
           <div style="font-size:12px;color:#633806;margin-top:4px">Este lote se intercalará en el plan desde esta fecha con prioridad máxima.</div>
         </div>
-
         <div class="form-group">
-          <label>Fecha límite (obligatoria para urgentes)</label>
+          <label>Fecha límite</label>
           <input type="date" id="lote-fecha-fin" class="form-input">
         </div>
-
         <div id="div-tipo-lote" class="form-group">
           <label>Tipo de producción</label>
           <select id="tipo-lote" class="form-input">
@@ -160,7 +169,6 @@
             <option value="hojas">📋 Solo hojas</option>
           </select>
         </div>
-
         <div class="form-group">
           <label>Cantidades a fabricar en este lote</label>
           <div class="aberturas-table-header">
