@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
   <header>
     <div class="header-inner">
       <div class="header-brand">
@@ -23,8 +22,7 @@
   </header>
 
   <main>
-
-    <!-- SECCION OBRAS -->
+    <!-- OBRAS -->
     <section id="sec-obras">
       <div class="section-header">
         <h1>Obras</h1>
@@ -32,23 +30,20 @@
       </div>
       <div id="obras-empty" class="empty-state hidden">
         <div class="empty-icon">📋</div>
-        <p>No hay obras cargadas todavía.</p>
+        <p>No hay obras cargadas.</p>
         <button class="btn-primary" onclick="showModal('modal-obra')">Cargar primera obra</button>
       </div>
       <div id="obras-grid" class="obras-grid"></div>
     </section>
 
-    <!-- SECCION PLANIFICAR -->
+    <!-- PLANIFICAR -->
     <section id="sec-planificar" class="hidden">
       <div class="section-header">
         <h1>Plan global de producción</h1>
       </div>
-
       <div class="plan-top">
-        <div style="flex:1">
-          <div style="font-size:13px;color:#6b6b68;margin-bottom:8px">
-            Indicá las cantidades a fabricar por obra. El sistema prioriza automáticamente por fecha de entrega más próxima.
-          </div>
+        <div style="font-size:13px;color:#6b6b68;flex:1">
+          Indicá las cantidades a fabricar y la fecha límite por obra. El sistema distribuye la producción en paralelo y te avisa si alguna fecha no es posible.
         </div>
         <div class="plan-controls">
           <label>Inicio planificación</label>
@@ -57,18 +52,18 @@
           <button class="btn-secondary" onclick="limpiarPlanGlobal()">Limpiar</button>
         </div>
       </div>
-
       <div id="plan-global-obras"></div>
 
       <div id="plan-resultado" class="hidden" style="margin-top:32px">
-        <h2 style="font-size:16px;font-weight:600;margin-bottom:16px">Plan semanal combinado</h2>
+        <h2 style="font-size:16px;font-weight:600;margin-bottom:12px">Resultado del plan</h2>
+        <div id="plan-alertas" style="margin-bottom:16px"></div>
         <div class="metrics-grid" id="plan-metrics"></div>
         <div class="op-legend" id="op-legend"></div>
         <div id="plan-weeks"></div>
       </div>
     </section>
 
-    <!-- SECCION CONFIG -->
+    <!-- CONFIG -->
     <section id="sec-config" class="hidden">
       <div class="section-header"><h1>Configuración</h1></div>
       <div class="config-grid">
@@ -102,7 +97,6 @@
       <button class="btn-primary" onclick="guardarConfig()" style="margin-top:20px">Guardar configuración</button>
       <span id="cfg-ok" class="save-ok hidden">✓ Guardado</span>
     </section>
-
   </main>
 
   <!-- MODAL NUEVA OBRA -->
@@ -130,18 +124,12 @@
           <input type="text" id="obra-sistema" placeholder="Ej: Nordical 90° Corrediza" class="form-input">
         </div>
         <div class="form-group">
-          <label>Fecha de entrega</label>
-          <input type="date" id="obra-fecha-entrega" class="form-input">
-        </div>
-        <div class="form-group">
           <label>Aberturas</label>
-          <p class="form-hint">Ingresá cada abertura con tipo, medida, descripción, categoría y cantidad total.</p>
-          <div id="aberturas-nuevas">
-            <div class="abertura-nueva-header">
-              <span>Tipo</span><span>Medida</span><span>Descripción</span><span>Cat.</span><span>Total</span><span></span>
-            </div>
-            <div id="abertura-rows"></div>
+          <p class="form-hint">Ingresá cada tipo de abertura con su medida, descripción, categoría y cantidad total de la obra.</p>
+          <div class="abertura-nueva-header">
+            <span>Tipo</span><span>Medida</span><span>Descripción</span><span>Cat.</span><span>Total</span><span></span>
           </div>
+          <div id="abertura-rows"></div>
           <button class="btn-secondary" onclick="agregarFilaAbertura()" style="margin-top:8px">+ Agregar abertura</button>
         </div>
       </div>
