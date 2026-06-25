@@ -20,31 +20,24 @@
       </nav>
     </div>
   </header>
-
   <main>
-    <!-- OBRAS -->
     <section id="sec-obras">
       <div class="section-header">
         <h1>Obras</h1>
         <button class="btn-primary" onclick="showModal('modal-obra')">+ Nueva obra</button>
       </div>
       <div id="obras-empty" class="empty-state hidden">
-        <div class="empty-icon">📋</div>
-        <p>No hay obras cargadas.</p>
+        <div class="empty-icon">📋</div><p>No hay obras cargadas.</p>
         <button class="btn-primary" onclick="showModal('modal-obra')">Cargar primera obra</button>
       </div>
       <div id="obras-grid" class="obras-grid"></div>
     </section>
 
-    <!-- PLANIFICAR -->
     <section id="sec-planificar" class="hidden">
-      <div class="section-header">
-        <h1>Plan de producción</h1>
-      </div>
-
+      <div class="section-header"><h1>Plan de producción</h1></div>
       <div class="plan-top">
         <div style="font-size:13px;color:#6b6b68;flex:1;line-height:1.6">
-          Agregá lotes de producción por obra. Podés agregar nuevos lotes en cualquier momento y el plan se actualiza automáticamente encadenando la producción sin baches.
+          Agregá lotes de producción por obra. Podés agregar nuevos lotes en cualquier momento y el plan los encadena automáticamente sin baches.
         </div>
         <div class="plan-controls">
           <label>Inicio planificación</label>
@@ -53,9 +46,7 @@
           <button class="btn-secondary" onclick="limpiarPlanGlobal()">Limpiar todo</button>
         </div>
       </div>
-
       <div id="lotes-container" style="margin-bottom:24px"></div>
-
       <div id="plan-resultado" class="hidden" style="margin-top:16px">
         <h2 style="font-size:16px;font-weight:600;margin-bottom:12px">Plan continuo de producción</h2>
         <div id="plan-alertas" style="margin-bottom:16px"></div>
@@ -65,7 +56,6 @@
       </div>
     </section>
 
-    <!-- CONFIG -->
     <section id="sec-config" class="hidden">
       <div class="section-header"><h1>Configuración</h1></div>
       <div class="config-grid">
@@ -109,28 +99,14 @@
         <button class="modal-close" onclick="hideModal('modal-obra')">✕</button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
-          <label>Nombre de la obra</label>
-          <input type="text" id="obra-nombre" placeholder="Ej: Torre Náutica" class="form-input">
-        </div>
-        <div class="form-group">
-          <label>Número de presupuesto</label>
-          <input type="text" id="obra-ppto" placeholder="Ej: 501793" class="form-input">
-        </div>
-        <div class="form-group">
-          <label>Cliente</label>
-          <input type="text" id="obra-cliente" placeholder="Ej: Empresa SA" class="form-input">
-        </div>
-        <div class="form-group">
-          <label>Sistema / Descripción</label>
-          <input type="text" id="obra-sistema" placeholder="Ej: Nordical 90° Corrediza" class="form-input">
-        </div>
+        <div class="form-group"><label>Nombre de la obra</label><input type="text" id="obra-nombre" placeholder="Ej: Torre Náutica" class="form-input"></div>
+        <div class="form-group"><label>Número de presupuesto</label><input type="text" id="obra-ppto" placeholder="Ej: 501793" class="form-input"></div>
+        <div class="form-group"><label>Cliente</label><input type="text" id="obra-cliente" placeholder="Ej: Empresa SA" class="form-input"></div>
+        <div class="form-group"><label>Sistema / Descripción</label><input type="text" id="obra-sistema" placeholder="Ej: Nordical 90° Corrediza" class="form-input"></div>
         <div class="form-group">
           <label>Aberturas</label>
           <p class="form-hint">Ingresá cada tipo con medida, descripción, categoría y cantidad total de la obra.</p>
-          <div class="abertura-nueva-header">
-            <span>Tipo</span><span>Medida</span><span>Descripción</span><span>Cat.</span><span>Total</span><span></span>
-          </div>
+          <div class="abertura-nueva-header"><span>Tipo</span><span>Medida</span><span>Descripción</span><span>Cat.</span><span>Total</span><span></span></div>
           <div id="abertura-rows"></div>
           <button class="btn-secondary" onclick="agregarFilaAbertura()" style="margin-top:8px">+ Agregar tipo</button>
         </div>
