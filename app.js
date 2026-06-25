@@ -76,13 +76,14 @@ function setFechaDefault() {
 // NAVEGACION
 // ============================================================
 function showSection(name) {
-  ['obras','planificar','config'].forEach(s => {
+  ['obras','planificar','stock','config'].forEach(s => {
     document.getElementById('sec-'+s).classList.toggle('hidden', s!==name);
   });
   document.querySelectorAll('.nav-btn').forEach((b,i) => {
-    b.classList.toggle('active', ['obras','planificar','config'][i]===name);
+    b.classList.toggle('active', ['obras','planificar','stock','config'][i]===name);
   });
   if (name==='planificar') renderLotes();
+  if (name==='stock') renderStock();
 }
 
 // ============================================================
@@ -685,6 +686,21 @@ function generarPlan() {
     document.getElementById('plan-alertas').parentNode.insertBefore(btnRow,document.getElementById('plan-alertas'));
   }
   document.getElementById('plan-resultado').scrollIntoView({behavior:'smooth',block:'start'});
+
+  // Acumular stock desde todos los días del plan
+  const todosDias=semanas.flatMap(s=>s.diasData);
+  const keysDelPlan=new Set();
+  todosDias.forEach(d=>{
+    const rd=d.resumenDia;
+    [['completos','completo'],['marcos','marcos'],['hojas','hojas']].forEach(([grupo,tl])=>{
+      Object.values(rd[grupo]).forEach(item=>{keysDelPlan.add(item.obraId+'_'+item.tipo+'_'+tl);});
+    });
+  });
+  keysDelPlan.forEach(k=>{if(stockTerminado[k])stockTerminado[k].qty=0;});
+  acumularStockDesdeResumen(todosDias);
+  despachos.forEach(d=>{d.items.forEach(item=>{const key=item.obraId+'_'+item.tipo+'_'+item.tipoLote;if(stockTerminado[key])stockTerminado[key].qty=Math.max(0,stockTerminado[key].qty-item.qty);});});
+  saveStock();
+  renderStock();
 }
 
 // ============================================================
@@ -784,4 +800,191 @@ function renderSemana(sem){
     <div class="capbar"><div class="capbar-fill" style="width:${pct}%;background:${barColor}"></div></div>
     <div class="week-body">${diasHtml}${libreHtml}</div>
   </div>`;
+}
+
+// ============================================================
+// STOCK DE PRODUCCION TERMINADA
+// ============================================================
+// stockTerminado: { obraId_tipo_tipoLote: { obraId, obraNombre, tipo, tipoLote, qty } }
+// despachos: [{ id, fecha, items:[{obraId,obraNombre,tipo,tipoLote,qty}], nota }]
+
+let stockTerminado = JSON.parse(localStorage.getItem('stock-terminado') || '{}');
+let despachos = JSON.parse(localStorage.getItem('despachos') || '[]');
+
+function saveStock() { localStorage.setItem('stock-terminado', JSON.stringify(stockTerminado)); }
+function saveDespachos() { localStorage.setItem('despachos', JSON.stringify(despachos)); }
+
+// Llamar esta función cuando se genera el plan para acumular el stock
+function acumularStockDesdeResumen(diasData) {
+  // Reconstruir stock acumulado desde los resúmenes de todos los días del plan
+  // NO se resetea; se suma lo producido que no fue despachado
+  diasData.forEach(d => {
+    const rd = d.resumenDia;
+    const agregarAlStock = (grupo, tipoLote) => {
+      Object.values(grupo).forEach(item => {
+        const key = item.obraId + '_' + item.tipo + '_' + tipoLote;
+        if (!stockTerminado[key]) {
+          stockTerminado[key] = { obraId: item.obraId, obraNombre: item.obraNombre, tipo: item.tipo, tipoLote, qty: 0 };
+        }
+        stockTerminado[key].qty += item.qty;
+      });
+    };
+    agregarAlStock(rd.completos, 'completo');
+    agregarAlStock(rd.marcos, 'marcos');
+    agregarAlStock(rd.hojas, 'hojas');
+  });
+}
+
+function renderStock() {
+  const container = document.getElementById('stock-container');
+  if (!container) return;
+
+  const items = Object.values(stockTerminado).filter(s => s.qty > 0.01);
+  
+  // Agrupar por tipo de producto
+  const completos = items.filter(s => s.tipoLote === 'completo');
+  const marcos    = items.filter(s => s.tipoLote === 'marcos');
+  const hojas     = items.filter(s => s.tipoLote === 'hojas');
+
+  const totalComp = completos.reduce((s,i) => s + i.qty, 0);
+  const totalMar  = marcos.reduce((s,i) => s + i.qty, 0);
+  const totalHoj  = hojas.reduce((s,i) => s + i.qty, 0);
+
+  let stockHtml = '';
+
+  if (!items.length) {
+    stockHtml = `<div class="empty-state" style="padding:40px 24px">
+      <div class="empty-icon">📦</div>
+      <p>No hay stock de producción terminada aún.</p>
+      <div style="font-size:13px;color:#9b9b98;margin-top:8px">Generá un plan de producción para ver el stock acumulado.</div>
+    </div>`;
+  } else {
+    // Métricas resumen
+    stockHtml += `<div class="metrics-grid" style="margin-bottom:20px">
+      <div class="metric"><div class="metric-label">🪟 Ventanas completas</div><div class="metric-value">${Math.round(totalComp)}</div><div class="metric-sub">en stock</div></div>
+      <div class="metric"><div class="metric-label">🔲 Marcos</div><div class="metric-value">${Math.round(totalMar)}</div><div class="metric-sub">en stock</div></div>
+      <div class="metric"><div class="metric-label">📋 Hojas</div><div class="metric-value">${Math.round(totalHoj)}</div><div class="metric-sub">en stock</div></div>
+      <div class="metric"><div class="metric-label">Total en depósito</div><div class="metric-value">${Math.round(totalComp+totalMar+totalHoj)}</div><div class="metric-sub">unidades</div></div>
+    </div>`;
+
+    // Tabla de stock
+    const renderGrupo = (lista, titulo, icono) => {
+      if (!lista.length) return '';
+      return `<div class="stock-grupo">
+        <div class="stock-grupo-titulo">${icono} ${titulo}</div>
+        <table class="stock-table">
+          <tr><th>Obra</th><th>Tipo</th><th>En stock</th><th>Despachar</th></tr>
+          ${lista.map(s => {
+            const key = s.obraId + '_' + s.tipo + '_' + s.tipoLote;
+            return `<tr>
+              <td>${s.obraNombre}</td>
+              <td><span class="badge badge-corr">${s.tipo}</span></td>
+              <td style="font-weight:600;text-align:center">${Math.round(s.qty)}</td>
+              <td><input type="number" min="0" max="${Math.round(s.qty)}" value="0" class="qty-input" id="desp-${key}" style="width:70px"></td>
+            </tr>`;
+          }).join('')}
+        </table>
+      </div>`;
+    };
+
+    stockHtml += renderGrupo(completos, 'Ventanas completas', '🪟');
+    stockHtml += renderGrupo(marcos, 'Marcos', '🔲');
+    stockHtml += renderGrupo(hojas, 'Hojas', '📋');
+
+    stockHtml += `<div class="despacho-form">
+      <div style="font-size:14px;font-weight:600;margin-bottom:12px">Registrar despacho a obra</div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+        <div>
+          <label style="font-size:12px;color:#6b6b68;display:block;margin-bottom:4px">Fecha de despacho</label>
+          <input type="date" id="despacho-fecha" class="form-input" style="width:180px" value="${new Date().toISOString().split('T')[0]}">
+        </div>
+        <div style="flex:1">
+          <label style="font-size:12px;color:#6b6b68;display:block;margin-bottom:4px">Nota (opcional)</label>
+          <input type="text" id="despacho-nota" class="form-input" placeholder="Ej: Camión 1, piso 3">
+        </div>
+      </div>
+      <button class="btn-primary" onclick="registrarDespacho()">Registrar despacho ↗</button>
+    </div>`;
+  }
+
+  // Historial de despachos
+  let historialHtml = '';
+  if (despachos.length) {
+    historialHtml = `<div style="margin-top:24px">
+      <h2 style="font-size:15px;font-weight:600;margin-bottom:12px">Historial de despachos</h2>
+      ${despachos.slice().reverse().map(d => {
+        const fecha = new Date(d.fecha+'T12:00:00').toLocaleDateString('es-UY',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+        const totalDesp = d.items.reduce((s,i) => s+i.qty, 0);
+        return `<div class="despacho-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="font-size:13px;font-weight:600">📦 Despacho del ${fecha}</div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:12px;color:#6b6b68">${totalDesp} unidades</span>
+              <button class="del-row-btn" onclick="eliminarDespacho('${d.id}')" title="Eliminar despacho">✕</button>
+            </div>
+          </div>
+          ${d.nota?`<div style="font-size:12px;color:#6b6b68;margin-bottom:6px">📝 ${d.nota}</div>`:''}
+          <div style="display:flex;flex-wrap:wrap;gap:4px">
+            ${d.items.map(i => {
+              const icono={completo:'🪟',marcos:'🔲',hojas:'📋'}[i.tipoLote]||'🪟';
+              return `<span class="chip">${icono} ${i.obraNombre.split(' ')[0]} ${i.tipo}×${Math.round(i.qty)}</span>`;
+            }).join('')}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+
+  container.innerHTML = stockHtml + historialHtml;
+}
+
+function registrarDespacho() {
+  const fecha = document.getElementById('despacho-fecha')?.value;
+  const nota  = document.getElementById('despacho-nota')?.value || '';
+  if (!fecha) { alert('Seleccioná una fecha de despacho.'); return; }
+
+  const items = [];
+  Object.entries(stockTerminado).forEach(([key, s]) => {
+    const el = document.getElementById('desp-'+key);
+    if (!el) return;
+    const qty = Math.min(parseFloat(el.value)||0, s.qty);
+    if (qty > 0.01) items.push({ obraId:s.obraId, obraNombre:s.obraNombre, tipo:s.tipo, tipoLote:s.tipoLote, qty });
+  });
+
+  if (!items.length) { alert('Ingresá al menos una unidad a despachar.'); return; }
+
+  // Descontar del stock
+  items.forEach(item => {
+    const key = item.obraId + '_' + item.tipo + '_' + item.tipoLote;
+    if (stockTerminado[key]) {
+      stockTerminado[key].qty = Math.max(0, stockTerminado[key].qty - item.qty);
+      if (stockTerminado[key].qty < 0.01) delete stockTerminado[key];
+    }
+  });
+
+  despachos.push({ id:'desp-'+Date.now(), fecha, nota, items });
+  saveStock(); saveDespachos();
+  renderStock();
+  alert(`✓ Despacho registrado: ${items.reduce((s,i)=>s+i.qty,0)} unidades enviadas a obra.`);
+}
+
+function eliminarDespacho(id) {
+  if (!confirm('¿Eliminar este despacho? Las unidades volverán al stock.')) return;
+  const d = despachos.find(x => x.id === id);
+  if (d) {
+    // Devolver al stock
+    d.items.forEach(item => {
+      const key = item.obraId + '_' + item.tipo + '_' + item.tipoLote;
+      if (!stockTerminado[key]) stockTerminado[key] = { obraId:item.obraId, obraNombre:item.obraNombre, tipo:item.tipo, tipoLote:item.tipoLote, qty:0 };
+      stockTerminado[key].qty += item.qty;
+    });
+  }
+  despachos = despachos.filter(x => x.id !== id);
+  saveStock(); saveDespachos(); renderStock();
+}
+
+function limpiarStock() {
+  if (!confirm('¿Limpiar todo el stock de terminados? Esta acción no se puede deshacer.')) return;
+  stockTerminado = {};
+  saveStock(); renderStock();
 }
