@@ -190,8 +190,8 @@ section { display: block; }
 .del-row-btn { background: none; border: none; color: var(--text-tertiary); cursor: pointer; font-size: 16px; padding: 0; }
 .del-row-btn:hover { color: var(--red-text); }
 
-/* PLAN GLOBAL */
-.obra-plan-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 16px; overflow: hidden; }
+/* LOTES Y PLAN GLOBAL */
+.obra-plan-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
 .obra-plan-header { padding: 14px 16px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
 .obra-plan-nombre { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
 .obra-plan-aberturas { padding: 0 16px; }
@@ -200,9 +200,9 @@ section { display: block; }
 .wb-crit { background: var(--red-bg); color: var(--red-text); }
 
 @media print {
-  header, .nav-btn, .btn-primary, .btn-secondary, .sugg-card,
-  .rot-active-info button, #btn-imprimir, .obra-actions,
-  .plan-controls, .free-slot button, #plan-global-obras { display: none !important; }
+  header, .nav-btn, .btn-primary, .btn-secondary,
+  #btn-imprimir, .obra-actions, .plan-controls,
+  .free-slot button, #lotes-container { display: none !important; }
   body { background: #fff; font-size: 12px; }
   main { padding: 0; max-width: 100%; }
   .week-block { break-inside: avoid; margin-bottom: 10px; }
